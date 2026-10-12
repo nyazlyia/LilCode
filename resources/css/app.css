@@ -1,9 +1,395 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Baloo 2', ui-rounded, 'Arial Rounded MT Bold', system-ui, sans-serif;
+    --font-body: 'Lexend', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    /* Palet utama */
+    --color-cream: #efecd7;
+    --color-blush: #e3afc9;
+    --color-sun: #edc92c;
+    --color-ruby: #e11a45;
+
+    /* Turunan */
+    --color-ink: #2b1020;          /* teks & garis tepi (wine gelap) */
+    --color-paper: #f8f6e8;        /* krem lebih terang untuk kartu */
+    --color-blush-soft: #f3d6e5;
+}
+
+@layer base {
+    html {
+        font-family: var(--font-body);
+        background-color: var(--color-cream);
+        background-image: radial-gradient(rgb(43 16 32 / 0.07) 1.5px, transparent 1.5px);
+        background-size: 22px 22px;
+        color: var(--color-ink);
+    }
+    body {
+        min-height: 100dvh;
+        font-size: 1.125rem;
+        line-height: 1.6;
+    }
+    h1, h2, h3 {
+        font-family: var(--font-display);
+        line-height: 1.1;
+    }
+    :focus-visible {
+        outline: 4px solid var(--color-ruby);
+        outline-offset: 3px;
+    }
+}
+
+@layer components {
+    /* ---------- Ikon SVG ---------- */
+    .ico {
+        width: 1.5em;
+        height: 1.5em;
+        flex: none;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2.6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    /* ---------- Kartu & label ---------- */
+    .card {
+        border: 3px solid var(--color-ink);
+        border-radius: 1.5rem;
+        background: var(--color-paper);
+        box-shadow: 5px 5px 0 var(--color-ink);
+    }
+    .tag {
+        display: inline-block;
+        padding: 0.15rem 0.9rem;
+        border: 2.5px solid var(--color-ink);
+        border-radius: 9999px;
+        background: var(--color-sun);
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1rem;
+    }
+    .pill {
+        display: inline-grid;
+        place-items: center;
+        min-width: 2.75rem;
+        height: 2.75rem;
+        padding-inline: 0.6rem;
+        border: 2.5px solid var(--color-ink);
+        border-radius: 9999px;
+        background: var(--color-paper);
+        font-family: var(--font-display);
+        font-weight: 800;
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+        box-shadow: 3px 3px 0 var(--color-ink);
+    }
+    .pill:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--color-ink); }
+    .pill-current { background: var(--color-ruby); color: var(--color-paper); }
+
+    /* ---------- Tombol ---------- */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 3rem;
+        padding: 0.4rem 1.25rem;
+        border: 3px solid var(--color-ink);
+        border-radius: 9999px;
+        background: var(--btn-bg, var(--color-paper));
+        color: var(--btn-fg, var(--color-ink));
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 1.125rem;
+        box-shadow: 4px 4px 0 var(--color-ink);
+        cursor: pointer;
+        touch-action: manipulation;
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .btn:hover:not(:disabled) {
+        transform: translate(-2px, -2px) rotate(-1deg);
+        box-shadow: 7px 7px 0 var(--color-ink);
+    }
+    .btn:active:not(:disabled) {
+        transform: translate(3px, 3px);
+        box-shadow: 1px 1px 0 var(--color-ink);
+    }
+    .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        box-shadow: 2px 2px 0 var(--color-ink);
+    }
+    .btn-run {
+        --btn-bg: var(--color-ruby);
+        --btn-fg: var(--color-paper);
+        min-height: 4rem;
+        padding-inline: 2rem;
+        font-size: 1.375rem;
+    }
+    .btn-sun { --btn-bg: var(--color-sun); }
+
+    /* warna blok perintah */
+    .blk-forward { --btn-bg: var(--color-sun); }
+    .blk-turn_left,
+    .blk-turn_right { --btn-bg: var(--color-blush); }
+    .blk-repeat { --btn-bg: var(--color-ruby); --btn-fg: var(--color-paper); }
+
+    .chip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        min-height: 3.25rem;
+        padding: 0.25rem 0.5rem 0.25rem 0.9rem;
+        border: 3px solid var(--color-ink);
+        border-radius: 1rem;
+        background: var(--btn-bg, var(--color-paper));
+        font-family: var(--font-display);
+        font-weight: 800;
+        box-shadow: 3px 3px 0 var(--color-ink);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .chip.is-active {
+        transform: scale(1.04) rotate(-1deg);
+        box-shadow: 0 0 0 4px var(--color-ruby), 3px 3px 0 4px var(--color-ink);
+    }
+    .chip-x {
+        display: grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 9999px;
+        background: rgb(255 255 255 / 0.6);
+        cursor: pointer;
+        transition: background 0.12s ease, transform 0.12s ease;
+    }
+    .chip-x:hover:not(:disabled) { background: var(--color-paper); transform: rotate(90deg); }
+    .chip-x .ico { width: 1.1rem; height: 1.1rem; }
+
+    /* blok Ulangi (wadah) */
+    .chip-repeat { flex-wrap: wrap; row-gap: 0.4rem; }
+    .chip-repeat.is-target {
+        box-shadow: 0 0 0 4px var(--color-sun), 3px 3px 0 4px var(--color-ink);
+    }
+    .repeat-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        cursor: pointer;
+    }
+    .repeat-label:hover { background: rgb(255 255 255 / 0.18); }
+    .stepper {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.15rem 0.35rem;
+        border: 2.5px solid var(--color-ink);
+        border-radius: 9999px;
+        background: var(--color-paper);
+        color: var(--color-ink);
+    }
+    .stepper button {
+        display: grid;
+        place-items: center;
+        width: 1.9rem;
+        height: 1.9rem;
+        border-radius: 9999px;
+        background: var(--color-sun);
+        cursor: pointer;
+    }
+    .stepper button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .stepper .ico { width: 1rem; height: 1rem; }
+    .stepper output { min-width: 1.4rem; text-align: center; font-weight: 800; }
+    .chip-end {
+        height: 0.9rem;
+        margin-top: -0.3rem;
+        border: 3px solid var(--color-ink);
+        border-top: none;
+        border-radius: 0 0 0.9rem 0.9rem;
+        background: var(--color-ruby);
+    }
+    .hint-empty {
+        margin-top: 0.3rem;
+        padding: 0.4rem 0.8rem;
+        border: 2.5px dashed var(--color-ink);
+        border-radius: 0.9rem;
+        font-size: 0.95rem;
+        opacity: 0.75;
+    }
+    .target-note {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        font-weight: 500;
+    }
+    .link-btn {
+        padding: 0.1rem 0.75rem;
+        border: 2.5px solid var(--color-ink);
+        border-radius: 9999px;
+        background: var(--color-sun);
+        font-family: var(--font-display);
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    /* ---------- Pipo bercerita ---------- */
+    .bubble {
+        position: relative;
+        padding: 0.9rem 1.1rem;
+        border: 3px solid var(--color-ink);
+        border-radius: 1.5rem;
+        background: var(--color-blush-soft);
+        box-shadow: 4px 4px 0 var(--color-ink);
+    }
+    .bubble::before {
+        content: '';
+        position: absolute;
+        left: -13px;
+        top: 1.6rem;
+        width: 20px;
+        height: 20px;
+        border-left: 3px solid var(--color-ink);
+        border-bottom: 3px solid var(--color-ink);
+        background: var(--color-blush-soft);
+        transform: rotate(45deg);
+    }
+
+    /* ---------- Panggung ---------- */
+    .stage {
+        position: relative;
+        width: min(100%, 28rem);
+        aspect-ratio: 1;
+        overflow: hidden;
+        border: 4px solid var(--color-ink);
+        border-radius: 1.75rem;
+        background: var(--color-paper);
+        box-shadow: 7px 7px 0 var(--color-ink);
+    }
+    .stage-grid {
+        position: absolute;
+        inset: 0;
+        display: grid;
+    }
+    .tile { position: relative; }
+    .tile-0, .tile-1 { background: #f8f6e8; }
+    .tile-0.alt, .tile-1.alt { background: #eeead0; }
+    .tile-2, .tile-3, .tile-4 { background: var(--color-blush); }
+    .tile-art {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .kiko {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        pointer-events: none;
+        transition: transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .kiko::before {
+        content: '';
+        position: absolute;
+        left: 18%;
+        right: 18%;
+        bottom: 2%;
+        height: 10%;
+        border-radius: 50%;
+        background: rgb(43 16 32 / 0.2);
+    }
+    .kiko-anim { position: absolute; inset: 0; }
+    .kiko-anim.is-bump { animation: bump 0.4s ease-in-out 1; }
+    .kiko-anim.is-win { animation: hop 0.5s ease-in-out 3; }
+    .kiko-sprite {
+        position: absolute;
+        inset: -4%;
+        width: 108%;
+        height: 108%;
+        transition: transform 0.2s ease;
+    }
+    .kiko-sprite.is-flipped { transform: scaleX(-1); }
+    .kiko-dir {
+        position: absolute;
+        inset: 0;
+        transition: transform 300ms ease-in-out;
+    }
+    .kiko-dir::after {
+        content: '';
+        position: absolute;
+        right: -1%;
+        top: 50%;
+        width: 17%;
+        height: 24%;
+        translate: 0 -50%;
+        background: var(--color-ruby);
+        clip-path: polygon(0 0, 100% 50%, 0 100%);
+    }
+
+    .confetti {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        overflow: hidden;
+        pointer-events: none;
+    }
+    .confetti i {
+        position: absolute;
+        top: -12%;
+        left: var(--x);
+        width: 0.7rem;
+        height: 1.1rem;
+        border: 2px solid var(--color-ink);
+        border-radius: 3px;
+        background: var(--c);
+        rotate: var(--r);
+        animation: fall 1.7s ease-in var(--d) 1 both;
+    }
+
+    /* ---------- Pesan hasil ---------- */
+    .msg {
+        padding: 0.75rem 1.1rem;
+        border: 3px solid var(--color-ink);
+        border-radius: 1.25rem;
+        box-shadow: 4px 4px 0 var(--color-ink);
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+    .msg-ok { background: var(--color-sun); }
+    .msg-try { background: var(--color-blush); }
+}
+
+@keyframes bump {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-7px); }
+    75% { transform: translateX(7px); }
+}
+@keyframes hop {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-16px); }
+}
+@keyframes fall {
+    from { top: -12%; }
+    to { top: 112%; }
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-8px) rotate(2deg); }
+}
+.float { animation: float 3.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+    .kiko, .kiko-dir, .btn, .chip, .pill, .chip-x, .kiko-sprite { transition: none; }
+    .chip-x:hover:not(:disabled) { transform: none; }
+    .kiko-anim.is-bump, .kiko-anim.is-win, .float { animation: none; }
+    .confetti { display: none; }
 }

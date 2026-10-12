@@ -1,7 +1,7 @@
 // resources/js/engine.js
 // Mesin eksekusi blok Petualangan Kode. JS murni (tanpa DOM) agar mudah diuji.
 //
-// Kode petak grid: 0 jalan, 1 rintangan (batu), 2 air, 3 jembatan. Petak 1 dan 2 tidak bisa dilewati.
+// Kode petak grid: 0 jalan, 1 rintangan (batu), 2 air, 3 jembatan, 4 batu pijakan. Hanya petak 1 dan 2 yang tidak bisa dilewati.
 // Arah: 'N' atas, 'E' kanan, 'S' bawah, 'W' kiri. Koordinat (x, y) dengan y=0 di baris paling atas.
 //
 // Program = pohon blok:
