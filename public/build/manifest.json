@@ -60,7 +60,7 @@
     "src": "node_modules/@fontsource/lexend/files/lexend-latin-500-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CYsVx9vt.css",
+    "file": "assets/app-ClDct6f-.css",
     "name": "app",
     "names": [
       "app.css"
@@ -69,7 +69,7 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-nTQebsy0.js",
+    "file": "assets/app-B9Nwq6Rm.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
