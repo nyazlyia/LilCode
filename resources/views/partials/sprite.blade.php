@@ -100,6 +100,8 @@
         <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 3l4 4-4 4M3 11V9a2 2 0 0 1 2-2h16M7 21l-4-4 4-4M21 13v2a2 2 0 0 1-2 2H3"/></symbol>
         <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
         <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+        <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14"/></symbol>
+        <symbol id="i-lock" viewBox="0 0 24 24"><path d="M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3"/></symbol>
         <symbol id="i-fork" viewBox="0 0 24 24"><path d="M12 21v-8M12 13L6 5M12 13l6-8M3 8l3-3 3 3M15 8l3-3 3 3"/></symbol>
         <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.700 5.800 6.300.800-4.600 4.300 1.200 6.300L12 17.200 6.400 20.200l1.200-6.300L3 9.600l6.300-.800z" fill="currentColor"/></symbol>
     </defs>

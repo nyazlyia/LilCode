@@ -21,6 +21,9 @@
             <svg class="h-11 w-11" viewBox="0 0 64 64" aria-hidden="true"><use href="#pipo"/></svg>
             <span>Petualangan <span class="text-ruby">Kode</span></span>
         </a>
+        <a href="{{ route('map') }}" class="btn">
+            <svg class="ico" aria-hidden="true"><use href="#i-map"/></svg> Peta
+        </a>
     </header>
 
     <main class="mx-auto max-w-6xl px-5 pb-16">

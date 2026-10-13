@@ -11,9 +11,13 @@
             Bantu Kiko si Kancil melewati hutan dan sungai. Susun blok perintah, tekan jalankan,
             dan lihat Kiko berjalan sesuai rencanamu. Kalau buntu, Pipo si Burung Hantu siap kasih petunjuk.
         </p>
-        <div class="mt-8">
-            <a href="{{ route('level', '1-1') }}" class="btn btn-run">
-                <svg class="ico" aria-hidden="true"><use href="#i-play"/></svg> Mulai Petualangan
+        <div class="mt-8 flex flex-wrap gap-4" x-data="resume(@js($levels))">
+            <a :href="nextUrl ?? '{{ route('map') }}'" class="btn btn-run">
+                <svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>
+                <span x-text="hasProgress ? 'Lanjutkan Petualangan' : 'Mulai Petualangan'">Mulai Petualangan</span>
+            </a>
+            <a href="{{ route('map') }}" class="btn btn-sun">
+                <svg class="ico" aria-hidden="true"><use href="#i-map"/></svg> Peta Dunia
             </a>
         </div>
 

@@ -354,6 +354,50 @@
         animation: fall 1.7s ease-in var(--d) 1 both;
     }
 
+    /* ---------- Bintang ---------- */
+    .star {
+        width: 3.25rem;
+        height: 3.25rem;
+        color: var(--color-paper);
+        stroke: var(--color-ink);
+        stroke-width: 1.6;
+        stroke-linejoin: round;
+        filter: drop-shadow(2px 2px 0 var(--color-ink));
+    }
+    .star.on {
+        color: var(--color-sun);
+        animation: pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--i, 0) * 0.18s) both;
+    }
+    .star-sm { width: 1.1rem; height: 1.1rem; filter: none; stroke-width: 2; }
+    .star-sm.on { animation: none; }
+
+    /* ---------- Peta dunia ---------- */
+    .world-head {
+        padding: 1rem 1.25rem;
+        border-bottom: 3px solid var(--color-ink);
+    }
+    .world-sun { background: var(--color-sun); }
+    .world-blush { background: var(--color-blush); }
+    .world-ruby { background: var(--color-ruby); color: var(--color-paper); }
+    .node {
+        display: grid;
+        place-items: center;
+        width: 4rem;
+        height: 4rem;
+        border: 3px solid var(--color-ink);
+        border-radius: 9999px;
+        background: var(--color-paper);
+        font-family: var(--font-display);
+        font-size: 1.6rem;
+        font-weight: 800;
+        box-shadow: 4px 4px 0 var(--color-ink);
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    a.node:hover { transform: translate(-2px, -2px) rotate(-3deg); box-shadow: 7px 7px 0 var(--color-ink); }
+    a.node:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--color-ink); }
+    .node-done { background: var(--color-sun); }
+    .node-locked { background: #d9d4b8; opacity: 0.75; box-shadow: 2px 2px 0 var(--color-ink); }
+
     /* ---------- Pesan hasil ---------- */
     .msg {
         padding: 0.75rem 1.1rem;
@@ -377,6 +421,10 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-16px); }
 }
+@keyframes pop {
+    from { transform: scale(0) rotate(-40deg); opacity: 0; }
+    to { transform: scale(1) rotate(0); opacity: 1; }
+}
 @keyframes fall {
     from { top: -12%; }
     to { top: 112%; }
@@ -390,6 +438,7 @@
 @media (prefers-reduced-motion: reduce) {
     .kiko, .kiko-dir, .btn, .chip, .pill, .chip-x, .kiko-sprite { transition: none; }
     .chip-x:hover:not(:disabled) { transform: none; }
-    .kiko-anim.is-bump, .kiko-anim.is-win, .float { animation: none; }
+    .kiko-anim.is-bump, .kiko-anim.is-win, .float, .star.on { animation: none; }
+    .node { transition: none; }
     .confetti { display: none; }
 }

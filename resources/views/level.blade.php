@@ -133,14 +133,26 @@
 
             <div aria-live="polite" role="status" class="grid gap-3">
                 <p x-show="message" x-transition.duration.250ms class="msg" :class="messageClass" x-text="message"></p>
-                <template x-if="status === 'success'">
-                    <div class="flex flex-wrap items-center gap-3">
-                        <p class="font-display text-lg font-semibold">
-                            Kamu memakai <span x-text="count"></span> blok (paling hemat: <span x-text="level.optimal_blocks"></span>).
+                <template x-if="status === 'success' && result">
+                    <div class="card grid gap-3 p-4">
+                        <div class="flex gap-2" role="img" :aria-label="result.stars + ' dari 3 bintang'">
+                            <template x-for="n in 3" :key="n">
+                                <svg class="star" :class="{ on: result.stars >= n }" :style="`--i:${n}`" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg>
+                            </template>
+                        </div>
+                        <p class="flex flex-wrap items-center gap-2 font-display text-xl font-extrabold">
+                            +<span x-text="result.points"></span> poin
+                            <span x-show="result.isNewBest" class="tag">Rekor baru!</span>
                         </p>
-                        <a x-show="nextUrl" :href="nextUrl" class="btn btn-sun">
-                            Level berikutnya <svg class="ico" aria-hidden="true"><use href="#i-next"/></svg>
-                        </a>
+                        <p>Kamu memakai <span x-text="count"></span> blok (paling hemat: <span x-text="level.optimal_blocks"></span>).</p>
+                        <div class="flex flex-wrap gap-3">
+                            <a x-show="nextUrl" :href="nextUrl" class="btn btn-sun">
+                                Level berikutnya <svg class="ico" aria-hidden="true"><use href="#i-next"/></svg>
+                            </a>
+                            <a href="{{ route('map') }}" class="btn">
+                                <svg class="ico" aria-hidden="true"><use href="#i-map"/></svg> Peta
+                            </a>
+                        </div>
                     </div>
                 </template>
             </div>
