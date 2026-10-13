@@ -5,7 +5,10 @@ import '@fontsource/lexend/latin-500.css';
 
 import Alpine from 'alpinejs';
 import codeCanvas from './components/codeCanvas.js';
+import { worldMap, resume } from './components/worldMap.js';
 
 window.Alpine = Alpine;
 Alpine.data('codeCanvas', codeCanvas);
+Alpine.data('worldMap', worldMap);
+Alpine.data('resume', resume);
 Alpine.start();

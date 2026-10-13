@@ -1,5 +1,7 @@
 // Komponen Alpine untuk halaman level: susun blok (termasuk Ulangi), jalankan, animasikan hasil engine.
 import { run, countBlocks, MIN_REPEAT, MAX_REPEAT } from '../engine.js';
+import { computeStars, computePoints } from '../scoring.js';
+import { store } from '../store.js';
 
 const SUPPORTED = ['forward', 'turn_left', 'turn_right', 'repeat'];
 const LABELS = { forward: 'Maju', turn_left: 'Belok Kiri', turn_right: 'Belok Kanan', repeat: 'Ulangi' };
@@ -49,6 +51,14 @@ export default function codeCanvas(level, nextUrl = null) {
     bump: false,
     status: null,
     message: '',
+    attempts: 0,  // berapa kali tombol Jalankan dipakai di kunjungan ini
+    hints: 0,     // jumlah petunjuk Pipo yang dipakai (diisi oleh fitur Teman AI)
+    result: null, // { stars, points, isNewBest } setelah menang
+    best: null,   // rekor tersimpan untuk level ini
+
+    init() {
+      this.best = store.progress(this.level.slug);
+    },
 
     // ---------- tampilan ----------
     get cells() {
@@ -197,6 +207,7 @@ export default function codeCanvas(level, nextUrl = null) {
       }
 
       this.running = true;
+      this.attempts += 1;
       this.say(null, '');
       this.resetKiko();
       const stepMs = prefersReducedMotion() ? STEP_MS_REDUCED : STEP_MS;
@@ -218,12 +229,24 @@ export default function codeCanvas(level, nextUrl = null) {
       }
 
       this.activeId = null;
+      if (result.status === 'success') this.finish();
       this.say(result.status, MESSAGES[result.status] ?? '');
       if (result.status === 'crash') {
         await sleep(stepMs);
         this.resetKiko();
       }
       this.running = false;
+    },
+
+    /** Hitung bintang & poin, lalu simpan rekor ke localStorage. */
+    finish() {
+      const stars = computeStars({ blocks: this.count, optimal: this.level.optimal_blocks, hints: this.hints });
+      const points = computePoints({ stars, attempts: this.attempts });
+      const { entry, isNewBest } = store.recordResult(this.level.slug, {
+        stars, blocks: this.count, hints: this.hints, attempts: this.attempts, points,
+      });
+      this.result = { stars, points, isNewBest };
+      this.best = entry;
     },
   };
 }

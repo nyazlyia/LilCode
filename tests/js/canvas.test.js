@@ -4,8 +4,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-globalThis.window = { matchMedia: () => ({ matches: true }) }; // gerakan dikurangi -> tes cepat
+// Stub browser: gerakan dikurangi (tes cepat) dan localStorage palsu.
+const memory = {};
+globalThis.window = {
+  matchMedia: () => ({ matches: true }),
+  localStorage: {
+    getItem: (k) => (k in memory ? memory[k] : null),
+    setItem: (k, v) => { memory[k] = String(v); },
+  },
+};
 const { default: codeCanvas } = await import('../../resources/js/components/codeCanvas.js');
+const { store } = await import('../../resources/js/store.js');
 
 const levels = JSON.parse(readFileSync(new URL('../../database/data/levels.json', import.meta.url), 'utf8'));
 const bySlug = Object.fromEntries(levels.map((l) => [l.slug, l]));
@@ -109,4 +118,41 @@ test('menghapus Ulangi yang sedang dipilih mengembalikan target ke susunan utama
 test('level Dunia 1 tidak menampilkan blok Ulangi di palet', () => {
   assert.deepEqual(codeCanvas(pub(bySlug['1-1']), null).palette, ['forward']);
   assert.ok(codeCanvas(pub(bySlug['2-1']), null).palette.includes('repeat'));
+});
+
+test('menang: bintang & poin dihitung dan progres tersimpan di localStorage', async () => {
+  const level = bySlug['1-1'];
+  const c = codeCanvas(pub(level), '/next');
+  c.init();
+  build(c, level.solution);
+  await c.play();
+  assert.equal(c.status, 'success');
+  assert.equal(c.result.stars, 3);
+  assert.equal(c.attempts, 1);
+  assert.equal(c.result.points, 270);
+  assert.equal(store.progress('1-1').stars, 3);
+  assert.ok(memory['petualangan-kode:v1'], 'tertulis ke localStorage');
+});
+
+test('dua kali jalan: bonus percobaan pertama hilang, rekor tidak turun', async () => {
+  const level = bySlug['1-2'];
+  const c = codeCanvas(pub(level), null);
+  c.init();
+  c.add('forward'); // sengaja salah dulu (belum sampai)
+  await c.play();
+  assert.equal(c.status, 'incomplete');
+  c.clearAll();
+  build(c, level.solution);
+  await c.play();
+  assert.equal(c.attempts, 2);
+  assert.equal(c.result.points, 250); // 100 + 150, tanpa bonus 20
+  assert.equal(c.result.stars, 3);
+});
+
+test('program yang ditolak engine tidak dihitung sebagai percobaan', async () => {
+  const c = codeCanvas(pub(bySlug['1-1']), null);
+  for (let i = 0; i < 5; i++) c.add('forward');
+  c.program.push({ id: 99, type: 'turn_left' }); // blok tidak diizinkan, disusupkan manual
+  await c.play();
+  assert.equal(c.attempts, 0);
 });
