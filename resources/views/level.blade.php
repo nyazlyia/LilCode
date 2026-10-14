@@ -106,6 +106,28 @@
                             </div>
                             <p x-show="row.kind === 'repeat' && row.empty" class="hint-empty">Ketuk blok di atas untuk memasukkannya ke sini.</p>
 
+                            {{-- awal blok Jika Ada Rintangan --}}
+                            <div x-show="row.kind === 'if'" class="chip chip-repeat blk-if_obstacle" :class="{ 'is-target': row.selected }">
+                                <span class="flex flex-wrap items-center gap-2">
+                                    <span class="grid h-7 w-7 place-items-center rounded-full bg-ink text-sm text-paper" x-text="row.n"></span>
+                                    <button type="button" class="repeat-label" @click="selectTarget(row.id, 'body')" :aria-pressed="row.selected" aria-label="Isi bagian Maka">
+                                        <svg class="ico" aria-hidden="true"><use href="#i-if_obstacle"/></svg> Jika ada rintangan di depan, maka:
+                                    </button>
+                                </span>
+                                <button type="button" class="chip-x" @click="remove(row.id)" :disabled="running" aria-label="Hapus blok Jika ini">
+                                    <svg class="ico" aria-hidden="true"><use href="#i-close"/></svg>
+                                </button>
+                            </div>
+                            <p x-show="row.kind === 'if' && row.empty" class="hint-empty">Ketuk blok di atas untuk memasukkannya ke bagian Maka.</p>
+
+                            {{-- bagian "Kalau tidak" --}}
+                            <div x-show="row.kind === 'else'" class="chip chip-else" :class="{ 'is-target': row.selected }">
+                                <button type="button" class="repeat-label" @click="selectTarget(row.id, 'else')" :aria-pressed="row.selected" aria-label="Isi bagian Kalau tidak">
+                                    Kalau tidak:
+                                </button>
+                            </div>
+                            <p x-show="row.kind === 'else' && row.empty" class="hint-empty">Ketuk blok di atas untuk memasukkannya ke bagian Kalau tidak.</p>
+
                             {{-- penutup blok Ulangi --}}
                             <div x-show="row.kind === 'end'" class="chip-end" aria-hidden="true"></div>
                         </li>
@@ -114,7 +136,7 @@
                 </ol>
 
                 <p x-show="target !== null" class="target-note">
-                    Blok baru masuk ke dalam Ulangi.
+                    <span x-text="targetSlot === 'else' ? 'Blok baru masuk ke bagian Kalau tidak.' : 'Blok baru masuk ke dalam wadah yang dipilih.'"></span>
                     <button type="button" class="link-btn" @click="selectTarget(null)">Pindah ke luar</button>
                 </p>
             </div>
@@ -126,9 +148,23 @@
                 <button type="button" class="btn" @click="reset()" :disabled="running">
                     <svg class="ico" aria-hidden="true"><use href="#i-reset"/></svg> Dari awal
                 </button>
+                <button type="button" class="btn blk-forward" @click="askPipo()" :disabled="running || pipo.loading">
+                    <svg class="h-7 w-7" viewBox="0 0 64 64" aria-hidden="true"><use href="#pipo"/></svg> Tanya Pipo
+                </button>
                 <button type="button" class="btn" @click="clearAll()" :disabled="running || count === 0">
                     <svg class="ico" aria-hidden="true"><use href="#i-trash"/></svg> Hapus semua
                 </button>
+            </div>
+
+            <div x-show="pipo.open" x-transition.duration.250ms class="flex items-start gap-3" aria-live="polite">
+                <svg class="h-16 w-16 shrink-0" viewBox="0 0 64 64" aria-hidden="true"><use href="#pipo"/></svg>
+                <div class="bubble ml-2 grow">
+                    <p x-show="pipo.loading" class="font-display font-semibold">Pipo sedang berpikir...</p>
+                    <p x-show="!pipo.loading" x-text="pipo.text"></p>
+                    <p class="mt-2 text-sm opacity-70">
+                        Petunjuk <span x-text="hints"></span>/5. Memakai petunjuk bisa mengurangi bintang.
+                    </p>
+                </div>
             </div>
 
             <div aria-live="polite" role="status" class="grid gap-3">

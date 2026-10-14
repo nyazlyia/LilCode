@@ -136,6 +136,8 @@
     .blk-turn_left,
     .blk-turn_right { --btn-bg: var(--color-blush); }
     .blk-repeat { --btn-bg: var(--color-ruby); --btn-fg: var(--color-paper); }
+    .blk-if_obstacle { --btn-bg: color-mix(in srgb, var(--color-sun) 40%, var(--color-blush)); }
+    .chip-else { --btn-bg: color-mix(in srgb, var(--color-sun) 40%, var(--color-blush)); min-height: 2.5rem; font-size: 1rem; }
 
     .chip {
         display: flex;

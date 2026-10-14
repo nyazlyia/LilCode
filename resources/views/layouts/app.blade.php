@@ -6,6 +6,7 @@
     <title>@yield('title', 'Petualangan Kode - Belajar Coding Seru untuk Anak SD')</title>
     <meta name="description" content="@yield('description', 'Belajar urutan, pengulangan, dan kondisi lewat teka-teki blok perintah bersama Kiko si Kancil. Gratis, tanpa daftar, untuk anak SD kelas 3-6.')">
     <meta name="theme-color" content="#EFECD7">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="canonical" href="{{ url()->current() }}">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="id_ID">

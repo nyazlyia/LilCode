@@ -46,7 +46,7 @@ class LevelCatalog
     /** Buang data rahasia sebelum dikirim ke browser. */
     public function exposed(array $level): array
     {
-        return Arr::except($level, ['solution', 'solution_outline']);
+        return Arr::except($level, ['solution', 'solution_outline', 'hints']);
     }
 
     /** Level di dunia yang sama (untuk navigasi kecil). */
