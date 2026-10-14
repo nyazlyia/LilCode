@@ -24,12 +24,19 @@ const pub = ({ solution, solution_outline, ...rest }) => rest; // seperti yang d
 function build(c, blocks) {
   for (const b of blocks) {
     const parent = c.target; // wadah tempat blok ini ditaruh
+    const parentSlot = c.targetSlot;
     c.add(b.type);
     if (b.type === 'repeat') {
       const id = c.target;
       c.setTimes(id, b.times - 2);
       build(c, b.body);
-      c.selectTarget(parent); // kembali ke wadah induk
+      c.selectTarget(parent, parentSlot);
+    } else if (b.type === 'if_obstacle') {
+      const id = c.target;
+      build(c, b.body);
+      c.selectTarget(id, 'else');
+      build(c, b.else_body ?? []);
+      c.selectTarget(parent, parentSlot);
     }
   }
 }
@@ -96,14 +103,17 @@ test('Ulangi: jumlah dibatasi 2..9', () => {
   assert.equal(c.program[0].times, 9);
 });
 
-test('Ulangi: sarang dibatasi 2 tingkat', () => {
-  const c = codeCanvas(pub(bySlug['2-2']), null);
+test('wadah bersarang dibatasi 3 tingkat', () => {
+  const c = codeCanvas(pub(bySlug['3-5']), null);
   c.add('repeat'); // tingkat 1
   c.add('repeat'); // tingkat 2
-  const before = c.count;
-  c.add('repeat'); // ditolak
-  assert.equal(c.count, before);
+  c.add('if_obstacle'); // tingkat 3
+  assert.equal(c.count, 3);
+  c.add('repeat'); // ditolak: terlalu dalam
+  assert.equal(c.count, 3);
   assert.match(c.message, /cukup dalam/);
+  c.add('forward'); // blok biasa tetap boleh di dalam tingkat 3
+  assert.equal(c.count, 4);
 });
 
 test('menghapus Ulangi yang sedang dipilih mengembalikan target ke susunan utama', () => {
@@ -155,4 +165,136 @@ test('program yang ditolak engine tidak dihitung sebagai percobaan', async () =>
   c.program.push({ id: 99, type: 'turn_left' }); // blok tidak diizinkan, disusupkan manual
   await c.play();
   assert.equal(c.attempts, 0);
+});
+
+test('Jika Ada Rintangan: bagian Maka dan Kalau tidak terisi terpisah', () => {
+  const c = codeCanvas(pub(bySlug['3-1']), null);
+  c.add('if_obstacle');
+  const id = c.target;
+  c.add('turn_right'); // masuk ke Maka
+  c.selectTarget(id, 'else');
+  c.add('forward'); // masuk ke Kalau tidak
+  const node = c.program[0];
+  assert.equal(node.body.length, 1);
+  assert.equal(node.body[0].type, 'turn_right');
+  assert.equal(node.else_body.length, 1);
+  assert.equal(node.else_body[0].type, 'forward');
+  assert.deepEqual(c.rows.map((r) => r.kind), ['if', 'block', 'else', 'block', 'end']);
+  assert.equal(c.rows.find((r) => r.kind === 'else').selected, true);
+});
+
+test('menghapus blok Jika membuang isinya dan mengembalikan target ke luar', () => {
+  const c = codeCanvas(pub(bySlug['3-1']), null);
+  c.add('if_obstacle');
+  const id = c.target;
+  c.add('forward');
+  c.remove(id);
+  assert.equal(c.count, 0);
+  assert.equal(c.target, null);
+  assert.equal(c.targetSlot, 'body');
+});
+
+test('palet: blok Jika hanya muncul di Dunia 3', () => {
+  assert.ok(codeCanvas(pub(bySlug['3-1']), null).palette.includes('if_obstacle'));
+  assert.ok(!codeCanvas(pub(bySlug['2-1']), null).palette.includes('if_obstacle'));
+});
+
+// ---------- Teman AI: Pipo ----------
+function fakeFetch(handler) {
+  const calls = [];
+  globalThis.fetch = async (url, options) => {
+    const body = JSON.parse(options.body);
+    calls.push({ url, options, body });
+    return handler(body, calls.length);
+  };
+  return calls;
+}
+const okReply = (hint) => ({ ok: true, json: async () => ({ hint, source: 'ai' }) });
+
+test('Pipo: tingkat petunjuk naik 1 -> 2 -> 3 dan tertahan di 3', async () => {
+  const calls = fakeFetch((_, n) => okReply(`petunjuk ${n}`));
+  const c = codeCanvas(pub(bySlug['2-1']), null);
+  for (let i = 0; i < 4; i++) await c.askPipo();
+  assert.deepEqual(calls.map((x) => x.body.tier), [1, 2, 3, 3]);
+  assert.equal(c.hints, 4);
+  assert.equal(c.pipo.text, 'petunjuk 4');
+  assert.equal(c.pipo.open, true);
+  assert.equal(c.pipo.loading, false);
+});
+
+test('Pipo: dibatasi 5 petunjuk per level, setelah itu tidak memanggil server', async () => {
+  const calls = fakeFetch(() => okReply('ok'));
+  const c = codeCanvas(pub(bySlug['2-2']), null);
+  for (let i = 0; i < 7; i++) await c.askPipo();
+  assert.equal(calls.length, 5);
+  assert.equal(c.hints, 5);
+  assert.equal(c.hintsLeft, 0);
+  assert.match(c.pipo.text, /5 petunjuk/);
+});
+
+test('Pipo: gagal jaringan, HTTP error, atau respons aneh tidak dihitung sebagai petunjuk', async () => {
+  const c = codeCanvas(pub(bySlug['2-3']), null);
+
+  globalThis.fetch = async () => { throw new Error('offline'); };
+  await c.askPipo();
+  assert.equal(c.hints, 0);
+  assert.match(c.pipo.text, /istirahat/);
+
+  globalThis.fetch = async () => ({ ok: false, status: 500, json: async () => ({}) });
+  await c.askPipo();
+  assert.equal(c.hints, 0);
+
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({ nope: 1 }) });
+  await c.askPipo();
+  assert.equal(c.hints, 0);
+  assert.equal(c.pipo.loading, false);
+
+  fakeFetch(() => okReply('Coba lagi, ya!'));
+  await c.askPipo();
+  assert.equal(c.hints, 1);
+});
+
+test('Pipo: payload memuat level, program polos, status terakhir, dan tidak memuat solusi', async () => {
+  const calls = fakeFetch(() => okReply('ok'));
+  const level = bySlug['2-1'];
+  const c = codeCanvas({ ...pub(level), solution: 'RAHASIA' }, null); // bahkan jika data bocor, payload tidak menyertakannya
+  c.add('forward');
+  await c.play(); // 1 langkah, belum sampai -> incomplete
+  await c.askPipo();
+  const { body, url, options } = calls[0];
+  assert.equal(url, '/api/mentor');
+  assert.equal(options.method, 'POST');
+  assert.equal(body.level, '2-1');
+  assert.equal(body.status, 'incomplete');
+  assert.equal(body.tier, 1);
+  assert.deepEqual(body.program.map((b) => b.type), ['forward']);
+  assert.ok(!JSON.stringify(body).includes('RAHASIA'));
+});
+
+test('Pipo: status invalid tidak dikirim, dan tidak bisa dipakai saat Kiko berjalan', async () => {
+  const calls = fakeFetch(() => okReply('ok'));
+  const c = codeCanvas(pub(bySlug['1-1']), null);
+  c.add('forward');
+  c.program.push({ id: 99, type: 'turn_left' }); // tidak diizinkan -> status invalid
+  await c.play();
+  assert.equal(c.lastStatus, 'invalid');
+  await c.askPipo();
+  assert.equal(calls[0].body.status, null);
+
+  c.running = true;
+  await c.askPipo();
+  assert.equal(calls.length, 1); // tidak memanggil saat running
+});
+
+test('Pipo: memakai petunjuk mengurangi bintang', async () => {
+  fakeFetch(() => okReply('ok'));
+  const level = bySlug['1-1'];
+  const c = codeCanvas(pub(level), null);
+  c.init();
+  await c.askPipo();
+  await c.askPipo();
+  build(c, level.solution);
+  await c.play();
+  assert.equal(c.status, 'success');
+  assert.equal(c.result.stars, 2); // optimal tercapai, tetapi 2 petunjuk dipakai
 });

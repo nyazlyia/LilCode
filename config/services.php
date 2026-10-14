@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'gemini' => [
+    'key' => env('GEMINI_API_KEY'),
+    'model' => env('GEMINI_MODEL', 'gemini-flash-lite-latest'),
+    'timeout' => (int) env('GEMINI_TIMEOUT', 8),
+    'base' => 'https://generativelanguage.googleapis.com/v1beta',
+    'thinking_budget' => env('GEMINI_THINKING_BUDGET'),
+    'thinking_level' => env('GEMINI_THINKING_LEVEL'),
+
+    ],
 ];
