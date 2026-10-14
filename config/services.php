@@ -42,6 +42,5 @@ return [
     'base' => 'https://generativelanguage.googleapis.com/v1beta',
     'thinking_budget' => env('GEMINI_THINKING_BUDGET'),
     'thinking_level' => env('GEMINI_THINKING_LEVEL'),
-
     ],
 ];
