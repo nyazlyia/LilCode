@@ -8,8 +8,6 @@ Dibuat untuk M-One Telkomsel Coding Competition, Kategori Umum.
 Tema: *Innovating Education Through Technology*, subtema *Web Education for Kids*.
 
 - Demo: https://lilcode.vercel.app
-- Dokumen acuan (PRD dan spesifikasi teknis): [`DOCS_ACUAN.md`](DOCS_ACUAN.md)
-- Jurnal prompt: [`docs/PROMPT_JOURNAL.md`](docs/PROMPT_JOURNAL.md), log mentah di [`docs/prompt-log/`](docs/prompt-log/)
 
 ## Fitur
 
@@ -76,7 +74,3 @@ Tes `LevelCatalogTest` hanya berjalan dengan `DB_CONNECTION=sqlite` di `phpunit.
 - Preset **Other**; `vercel.json` memakai runtime `vercel-php`.
 - Hasil `npm run build` (`public/build`) di-commit (`git add -f public/build`) karena Vercel tidak menjalankan build Node untuk proyek PHP.
 - Isi Environment Variables (`APP_KEY`, `GEMINI_API_KEY`, ...) di dasbor Vercel, lalu deploy ulang.
-
-## Lisensi dan atribusi
-
-Lihat [`docs/ATTRIBUTIONS.md`](docs/ATTRIBUTIONS.md).
