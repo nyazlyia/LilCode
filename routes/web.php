@@ -16,7 +16,8 @@ Route::get('/level/{slug}', [LevelController::class, 'show'])
     ->where('slug', '[1-3]-[1-5]')
     ->name('level');
 
-// Teman AI Pipo: proksi aman ke Gemini (API key hanya ada di server).
-Route::post('/api/mentor', [MentorController::class, 'hint'])
+Route::post('/mentor', [MentorController::class, 'hint'])
     ->middleware('throttle:10,1')
     ->name('mentor');
+Route::post('/api/mentor', [MentorController::class, 'hint'])
+    ->middleware('throttle:10,1');
