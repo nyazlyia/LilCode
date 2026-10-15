@@ -400,6 +400,21 @@
     .node-done { background: var(--color-sun); }
     .node-locked { background: #d9d4b8; opacity: 0.75; box-shadow: 2px 2px 0 var(--color-ink); }
 
+    /* ---------- Lencana ---------- */
+    .medal {
+        display: grid;
+        place-items: center;
+        width: 5rem;
+        height: 5rem;
+        border: 3px solid var(--color-ink);
+        border-radius: 9999px;
+        background: var(--color-sun);
+        box-shadow: 4px 4px 0 var(--color-ink);
+    }
+    .medal .ico { width: 2.4rem; height: 2.4rem; stroke-width: 2.4; }
+    .medal-off { background: #d9d4b8; opacity: 0.7; box-shadow: 2px 2px 0 var(--color-ink); }
+    .medal-off .ico { opacity: 0.45; }
+
     /* ---------- Pesan hasil ---------- */
     .msg {
         padding: 0.75rem 1.1rem;

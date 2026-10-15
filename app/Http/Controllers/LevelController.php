@@ -15,6 +15,11 @@ class LevelController extends Controller
         return view('map', ['worlds' => $this->catalog->worlds()]);
     }
 
+    public function badges()
+    {
+        return view('badges', ['worlds' => $this->catalog->worlds()]);
+    }
+
     public function show(string $slug)
     {
         $level = $this->catalog->find($slug);

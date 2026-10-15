@@ -2,13 +2,16 @@
 
 namespace App\Services;
 
+use App\Models\Level;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
- * Sumber data level. Sementara membaca database/data/levels.json.
- * Saat TiDB siap, cukup ganti isi all() agar membaca dari model Level;
- * controller dan view tidak perlu diubah.
+ * Sumber data level. Membaca dari TiDB (tabel levels + hints) bila LEVELS_SOURCE=database,
+ * dan selalu kembali ke database/data/levels.json jika database tidak bisa dibaca atau kosong,
+ * sehingga permainan tidak pernah berhenti karena masalah koneksi.
  */
 class LevelCatalog
 {
@@ -18,8 +21,46 @@ class LevelCatalog
         3 => ['name' => 'Gua Kondisi', 'blurb' => 'Pilih jalan sesuai keadaan di depan Kiko.', 'color' => 'ruby'],
     ];
 
+    private ?Collection $memo = null;
+
     /** @return Collection<int, array<string, mixed>> */
     public function all(): Collection
+    {
+        return $this->memo ??= $this->load();
+    }
+
+    private function load(): Collection
+    {
+        if (config('petualangan.levels_source') === 'database') {
+            try {
+                $levels = $this->fromDatabase();
+                if ($levels->isNotEmpty()) {
+                    return $levels;
+                }
+                Log::warning('Tabel levels kosong, memakai levels.json');
+            } catch (Throwable $e) {
+                Log::warning('Gagal membaca level dari database, memakai levels.json', ['error' => $e->getMessage()]);
+            }
+        }
+
+        return $this->fromJson();
+    }
+
+    /** @return Collection<int, array<string, mixed>> */
+    private function fromDatabase(): Collection
+    {
+        return Level::query()
+            ->with('hints')
+            ->where('is_published', true)
+            ->orderBy('world')
+            ->orderBy('position')
+            ->get()
+            ->map(fn (Level $level) => $level->toCatalogArray())
+            ->values();
+    }
+
+    /** @return Collection<int, array<string, mixed>> */
+    private function fromJson(): Collection
     {
         $json = file_get_contents(database_path('data/levels.json'));
 

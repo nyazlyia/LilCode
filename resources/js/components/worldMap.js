@@ -1,5 +1,6 @@
 // Komponen peta dunia dan tombol "Lanjutkan" di beranda.
 import { store } from '../store.js';
+import { evaluateBadges } from '../badges.js';
 
 /** Peta: worlds = [{ world, name, blurb, color, levels: [{ slug, title, position, url }] }] */
 export function worldMap(worlds) {
@@ -50,6 +51,24 @@ export function resume(levels) {
     get nextUrl() {
       const next = order.find((slug) => !store.isCompleted(slug));
       return next ? urls[next] : null;
+    },
+  };
+}
+
+/** Rak lencana: worlds = [{ world, levels: [{ slug }] }] */
+export function badgeShelf(worlds) {
+  return {
+    get badges() {
+      return evaluateBadges(store.state().progress, worlds);
+    },
+    get earned() {
+      return this.badges.filter((b) => b.earned).length;
+    },
+    get stars() {
+      return store.totalStars();
+    },
+    get points() {
+      return store.state().points;
     },
   };
 }

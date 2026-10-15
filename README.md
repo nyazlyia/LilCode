@@ -1,58 +1,82 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Petualangan Kode
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Web edukasi interaktif untuk anak SD kelas 3-6. Anak menyusun blok perintah untuk membantu Kiko si Kancil
+mencapai bendera, dan belajar **urutan**, **pengulangan**, dan **kondisi**. Tanpa daftar, tanpa login.
+Kalau buntu, Pipo si Burung Hantu (Teman AI) memberi petunjuk, bukan kunci jawaban.
 
-## About Laravel
+Dibuat untuk M-One Telkomsel Coding Competition, Kategori Umum.
+Tema: *Innovating Education Through Technology*, subtema *Web Education for Kids*.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Demo: https://lilcode.vercel.app
+- Dokumen acuan (PRD dan spesifikasi teknis): [`DOCS_ACUAN.md`](DOCS_ACUAN.md)
+- Jurnal prompt: [`docs/PROMPT_JOURNAL.md`](docs/PROMPT_JOURNAL.md), log mentah di [`docs/prompt-log/`](docs/prompt-log/)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Fitur
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- 15 level di 3 dunia: Hutan Urutan, Sungai Pengulangan, Gua Kondisi
+- Blok: Maju, Belok Kiri/Kanan, Ulangi N Kali, Jika Ada Rintangan (dengan bagian "Maka" dan "Kalau tidak")
+- Animasi Kiko per langkah, sorotan blok yang sedang berjalan, dan konfeti saat menang
+- Bintang 1-3, poin, dan 8 lencana, disimpan di `localStorage` (tanpa akun)
+- Teman AI Pipo (Google Gemini) dengan petunjuk bertahap, batas 5 per level, dan petunjuk cadangan
+- Halaman Untuk Guru dan Orang Tua, peta dunia, dan koleksi lencana
+- Responsif (HP sampai laptop), mendukung `prefers-reduced-motion`, SVG buatan sendiri
 
-## Learning Laravel
+## Teknologi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Laravel (polos, tanpa starter kit) - Blade - Tailwind CSS - Alpine.js (Vite) - TiDB Cloud (opsional) - Google Gemini API - Vercel.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Menjalankan di lokal
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Prasyarat: PHP 8.3+, Composer, Node.js 20+.
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+npm run build
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Buka http://127.0.0.1:8000. Untuk pengembangan, jalankan `npm run dev` di terminal lain.
 
-## Contributing
+### Variabel lingkungan
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Variabel | Fungsi |
+|---|---|
+| `APP_KEY` | Kunci aplikasi (`php artisan key:generate`) |
+| `SESSION_DRIVER=cookie`, `CACHE_STORE=array`, `QUEUE_CONNECTION=sync` | Tanpa tabel sesi/cache (cocok untuk serverless) |
+| `GEMINI_API_KEY`, `GEMINI_MODEL` | Teman AI. Tanpa kunci, Pipo memakai petunjuk cadangan |
+| `LEVELS_SOURCE` | `json` (default) atau `database` |
+| `DB_*`, `MYSQL_ATTR_SSL_CA` | Hanya jika `LEVELS_SOURCE=database` (TiDB Cloud) |
 
-## Code of Conduct
+Kunci dan kata sandi **tidak pernah** dimasukkan ke repository. Isi di `.env` (lokal) dan Environment Variables Vercel.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Memakai TiDB (opsional)
 
-## Security Vulnerabilities
+```bash
+php artisan migrate
+php artisan db:seed --class=LevelSeeder
+# lalu set LEVELS_SOURCE=database
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Jika database tidak bisa dibaca, aplikasi otomatis memakai `database/data/levels.json`.
 
-## License
+## Pengujian
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+npm run test:js        # engine, komponen, penyimpanan, lencana
+php artisan test       # mentor AI, katalog level, halaman
+```
+
+Tes `LevelCatalogTest` hanya berjalan dengan `DB_CONNECTION=sqlite` di `phpunit.xml` (melindungi database sungguhan dari `migrate:fresh`).
+
+## Deploy ke Vercel
+
+- Preset **Other**; `vercel.json` memakai runtime `vercel-php`.
+- Hasil `npm run build` (`public/build`) di-commit (`git add -f public/build`) karena Vercel tidak menjalankan build Node untuk proyek PHP.
+- Isi Environment Variables (`APP_KEY`, `GEMINI_API_KEY`, ...) di dasbor Vercel, lalu deploy ulang.
+
+## Lisensi dan atribusi
+
+Lihat [`docs/ATTRIBUTIONS.md`](docs/ATTRIBUTIONS.md).

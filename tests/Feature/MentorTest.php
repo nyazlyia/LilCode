@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Services\LevelCatalog;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -91,9 +92,18 @@ class MentorTest extends TestCase
 
     public function test_data_level_untuk_browser_tidak_memuat_rahasia(): void
     {
+        $level = app(LevelCatalog::class)->find('1-1');
         $html = $this->get('/level/1-1')->assertOk()->getContent();
 
-        $this->assertStringNotContainsString('solution_outline', $html);
-        $this->assertStringNotContainsString('"hints"', $html);
+        // Kunci rahasia (di dalam JSON level, tanda kutip ditulis sebagai \u0022).
+        $this->assertStringNotContainsString('\u0022solution\u0022', $html);
+        $this->assertStringNotContainsString('\u0022solution_outline\u0022', $html);
+        $this->assertStringNotContainsString('\u0022hints\u0022', $html);
+
+        // Isi rahasianya sendiri: catatan solusi dan semua petunjuk cadangan.
+        $this->assertStringNotContainsString($level['solution_outline'], $html);
+        foreach ($level['hints'] as $hint) {
+            $this->assertStringNotContainsString($hint['body'], $html);
+        }
     }
 }
